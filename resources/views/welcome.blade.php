@@ -7,8 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-
+    
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -41,6 +40,7 @@
         .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .text-glow { text-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .ambient-shadow { box-shadow: 0 24px 48px -12px rgba(0, 94, 151, 0.08); }
+        [x-cloak] { display: none !important; }
     </style>
     @livewireStyles
 </head>
@@ -53,8 +53,9 @@
             <div class="hidden md:flex items-center space-x-8">
                 <a class="text-primary border-b-2 border-primary pb-1 font-semibold" href="#">Home</a>
                 <a class="text-on-surface-variant hover:text-primary transition-colors" href="#explore">Destinations</a>
-                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Culinary</a>
-                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Culture</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#culinary">Culinary</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#culture">Culture</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#events">Events</a>
             </div>
             <div class="flex items-center space-x-4">
                 @if (Route::has('login'))
@@ -87,15 +88,72 @@
         </section>
 
         <section id="explore" class="py-24 px-8 max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                 <div class="max-w-2xl">
                     <h2 class="text-4xl md:text-5xl font-headline font-bold text-on-surface mb-4">Pristine Archipelago</h2>
-                    <p class="text-lg text-on-surface-variant leading-relaxed">Temukan destinasi pilihan di Kepulauan Anambas berdasarkan standar kualitas atraksi dan aksesibilitas.</p>
+                    <p class="text-lg text-on-surface-variant leading-relaxed">Temukan destinasi pilihan di Kepulauan Anambas berdasarkan standar kualitas atraksi.</p>
                 </div>
-                <div class="h-px flex-grow bg-outline-variant/30 mx-8 hidden md:block"></div>
             </div>
-
             @livewire('destination-list')
+        </section>
+
+        @php
+            $culinary = \App\Models\Culinary::latest()->take(3)->get();
+            $cultures = \App\Models\Culture::latest()->take(3)->get();
+            $events = \App\Models\Event::latest()->take(3)->get();
+        @endphp
+
+        <section id="culinary" class="py-20 bg-surface-container-low px-8">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl font-headline font-bold mb-10 border-l-4 border-tertiary pl-4">Local Flavors</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    @foreach($culinary as $item)
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100">
+                        <img src="{{ asset('storage/' . $item->thumbnail) }}" class="w-full h-56 object-cover" alt="{{ $item->name }}">
+                        <div class="p-6">
+                            <span class="text-xs font-bold text-tertiary uppercase">{{ $item->district }}</span>
+                            <h3 class="text-xl font-bold mt-2">{{ $item->name }}</h3>
+                            <p class="text-slate-500 text-sm mt-2 line-clamp-2">{{ $item->description_id }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section id="culture" class="py-20 px-8">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl font-headline font-bold mb-10 border-l-4 border-primary pl-4">Heritage & Traditions</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    @foreach($cultures as $item)
+                    <div class="group relative rounded-3xl overflow-hidden h-[400px]">
+                        <img src="{{ asset('storage/' . $item->thumbnail) }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="{{ $item->name }}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-8 flex flex-col justify-end">
+                            <h3 class="text-2xl font-bold text-white">{{ $item->name }}</h3>
+                            <p class="text-white/80 text-sm mt-2">{{ $item->district }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+
+        <section id="events" class="py-20 bg-slate-900 px-8 text-white">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl font-headline font-bold mb-10 border-l-4 border-primary-fixed pl-4">Upcoming Events</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    @foreach($events as $item)
+                    <div class="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/10">
+                        <img src="{{ asset('storage/' . $item->thumbnail) }}" class="w-full h-40 object-cover rounded-2xl mb-4" alt="{{ $item->name }}">
+                        <h3 class="text-xl font-bold">{{ $item->name }}</h3>
+                        <p class="text-white/60 text-sm mt-2">{{ $item->district }}</p>
+                        <div class="mt-4 flex items-center text-primary-fixed font-bold text-sm uppercase tracking-widest">
+                            Join Event →
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
         </section>
     </main>
 
@@ -109,12 +167,7 @@
                 <div class="font-headline font-bold text-primary text-xl mb-2">Anambas Tourism Hub</div>
                 <p class="max-w-xs">Preserving the untouched beauty of the Anambas archipelago for future generations.</p>
             </div>
-            <div class="flex gap-8 mb-8 md:mb-0 font-medium">
-                <a href="#" class="hover:text-primary transition-colors">Privacy</a>
-                <a href="#" class="hover:text-primary transition-colors">Terms</a>
-                <a href="#" class="hover:text-primary transition-colors">Contact</a>
-            </div>
-            <p>© 2026 Anambas Hub. Built by KIEL.</p>
+            <p>© 2026 Anambas Hub. Built by Arzeki.</p>
         </div>
     </footer>
 

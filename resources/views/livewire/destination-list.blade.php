@@ -47,10 +47,12 @@
                     </div>
                     
                     <div class="flex items-center justify-between mt-6">
-                        <a href="/destinations/{{ $item->slug }}" class="text-primary font-bold text-sm flex items-center gap-2 group/btn">
-                            Explore Destination 
-                            <span class="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
-                        </a>
+                        <div class="flex items-center justify-between mt-6">
+                            <a href="{{ route('destination.detail', $item->slug) }}" class="text-primary font-bold text-sm flex items-center gap-2 group/btn">
+                                Explore Destination 
+                                <span class="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
