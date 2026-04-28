@@ -15,10 +15,14 @@ class Chatbot extends Component
     {
         if (empty($this->message)) return;
 
-        $destinasi = Destination::all()->map(function($item) {
-            return "Wisata: {$item->name}, Info: {$item->description}";
-        })->implode(" | ");
+        // 1. AMBIL DATA DARI DATABASE
+        $destinasiData = Destination::all();
+        
+        $destinasiString = $destinasiData->map(function($item) {
+            return "NAMA: {$item->name} | INFO: {$item->description} | FILE_GAMBAR: {$item->image}";
+        })->implode(" --- ");
 
+        // Simpan pesan user ke history
         $this->chatHistory[] = ['role' => 'user', 'content' => $this->message];
         $userQuestion = $this->message;
         $this->message = '';
@@ -26,57 +30,78 @@ class Chatbot extends Component
         try {
             $apiKey = env('GEMINI_API_KEY');
 
-            /**
-             * LANGKAH 1: Ambil daftar model yang tersedia untuk KEY kamu.
-             * Ini akan menjawab teka-teki "Model mana yang aktif?".
-             */
+            // LANGKAH 1: Cari model yang aktif
             $listResponse = Http::withOptions(['verify' => false])
                 ->get("https://generativelanguage.googleapis.com/v1beta/models?key=" . $apiKey);
 
             $availableModels = $listResponse->json();
             $targetModel = '';
 
-            // Cari model yang mendukung 'generateContent'
             if (isset($availableModels['models'])) {
                 foreach ($availableModels['models'] as $m) {
-                    // Kita prioritaskan gemini-1.5-flash
                     if (str_contains($m['name'], 'gemini-1.5-flash')) {
                         $targetModel = $m['name'];
                         break;
                     }
                 }
-                // Jika tidak ada flash, ambil model pertama yang ada
                 if (!$targetModel && count($availableModels['models']) > 0) {
                     $targetModel = $availableModels['models'][0]['name'];
                 }
             }
 
             if (!$targetModel) {
-                throw new \Exception("Tidak ada model Gemini yang ditemukan di akun ini.");
+                throw new \Exception("Tidak ada model Gemini yang ditemukan.");
             }
 
-            /**
-             * LANGKAH 2: Kirim pertanyaan ke model yang sudah ditemukan.
-             */
+            // LANGKAH 2: Kirim pertanyaan ke Gemini
             $url = "https://generativelanguage.googleapis.com/v1beta/{$targetModel}:generateContent?key=" . $apiKey;
+
+            $systemInstruction = "Kamu adalah Guide Anambas AI, pakar pariwisata Kepulauan Anambas. " .
+                                "DATA INTERNAL KAMI: $destinasiString. " .
+                                "\n\nATURAN MENJAWAB:" .
+                                "\n1. Gunakan pengetahuan luasmu untuk menjawab pertanyaan umum seputar Anambas (sejarah, cuaca, cara transportasi, dll) meskipun tidak ada di DATA INTERNAL." .
+                                "\n2. Jika kamu membahas tempat atau makanan yang terdaftar di DATA INTERNAL, kamu WAJIB menyertakan tag [IMG:nama_file_lengkap] di akhir jawabanmu." .
+                                "\n3. Ambil 'nama_file_lengkap' PERSIS dari field FILE_GAMBAR (contoh: [IMG:mie-tarempa.webp])." .
+                                "\n4. Jika tempat tersebut tidak punya data FILE_GAMBAR atau tidak ada di DATA INTERNAL, jangan sertakan tag [IMG:]." .
+                                "\n5. Jawablah dengan ramah dan santai seperti pemandu wisata.";
 
             $response = Http::withOptions(['verify' => false])
                 ->post($url, [
                     'contents' => [
-                        ['parts' => [['text' => "Kamu Guide Anambas. Data: $destinasi. Pertanyaan: $userQuestion"]]]
+                        ['parts' => [['text' => "$systemInstruction \n\n Pertanyaan User: $userQuestion"]]]
                     ]
                 ]);
 
             if ($response->successful()) {
                 $result = $response->json();
-                $botResponse = $result['candidates'][0]['content']['parts'][0]['text'] ?? 'AI tidak merespon.';
-                $this->chatHistory[] = ['role' => 'bot', 'content' => $botResponse];
+                $botResponse = $result['candidates'][0]['content']['parts'][0]['text'] ?? 'Maaf, saya sedang kehilangan sinyal di Anambas.';
+
+                // --- FIX BINTANG (BOLD) ---
+                // Mengubah format **teks** menjadi <b>teks</b>
+                $botResponse = preg_replace('/\*\*(.*?)\*\*/', '<b>$1</b>', $botResponse);
+
+                // --- LOGIKA PARSING GAMBAR ---
+                $imagePath = null;
+                if (preg_match('/\[IMG:(.*?)\]/', $botResponse, $matches)) {
+                    $imagePath = trim($matches[1]);
+                    // Hapus tag agar tidak mengganggu tampilan teks chat
+                    $botResponse = str_replace($matches[0], '', $botResponse);
+                }
+
+                $this->chatHistory[] = [
+                    'role' => 'bot', 
+                    'content' => $botResponse,
+                    'image' => $imagePath
+                ];
+
+                $this->dispatch('scroll-to-bottom');
+
             } else {
-                $this->chatHistory[] = ['role' => 'bot', 'content' => "Gagal kirim: " . $response->body()];
+                $this->chatHistory[] = ['role' => 'bot', 'content' => "Gagal terhubung ke AI. Coba lagi ya!"];
             }
 
         } catch (\Exception $e) {
-            $this->chatHistory[] = ['role' => 'bot', 'content' => "Error Sistem: " . $e->getMessage()];
+            $this->chatHistory[] = ['role' => 'bot', 'content' => "Sistem sedang sibuk. Silakan coba lagi nanti."];
         }
     }
 
