@@ -45,23 +45,23 @@
     @livewireStyles
 </head>
 
-<body class="bg-surface font-body text-gray-900">
+<body class="bg-surface font-body text-on-surface">
 
-    <nav class="fixed top-0 w-full z-50 bg-white/70 glass-nav transition-all duration-300 border-b border-outline-variant/20">
+    <nav class="fixed top-0 w-full z-50 bg-surface/70 glass-nav transition-all duration-300 border-b border-outline-variant/20">
         <div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto font-headline tracking-tight">
             <div class="text-xl font-bold text-primary">Anambas Tourism Hub</div>
             <div class="hidden md:flex items-center space-x-8">
                 <a class="text-primary border-b-2 border-primary pb-1 font-semibold" href="#">Home</a>
-                <a class="text-gray-600 hover:text-primary transition-colors" href="#">Destinations</a>
-                <a class="text-gray-600 hover:text-primary transition-colors" href="#">Culinary</a>
-                <a class="text-gray-600 hover:text-primary transition-colors" href="#">Culture</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#explore">Destinations</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Culinary</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Culture</a>
             </div>
             <div class="flex items-center space-x-4">
                 @if (Route::has('login'))
                     @auth
                         <a href="{{ url('/dashboard') }}" class="text-primary font-medium px-4">Dashboard</a>
                     @else
-                        <a href="{{ route('login') }}" class="text-gray-700 font-medium px-4">Login</a>
+                        <a href="{{ route('login') }}" class="text-on-surface font-medium px-4">Login</a>
                         <a href="{{ route('register') }}" class="bg-primary-container text-white px-6 py-2.5 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all">Register</a>
                     @endauth
                 @endif
@@ -70,9 +70,9 @@
     </nav>
 
     <main>
-        <section class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <section class="relative h-[90vh] w-full flex items-center justify-center overflow-hidden">
             <div class="absolute inset-0 z-0">
-                <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1544918877-460635b6d13e?q=80&w=2070&auto=format&fit=crop" />
+                <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1544918877-460635b6d13e?q=80&w=2070&auto=format&fit=crop" alt="Anambas Hero" />
                 <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-surface"></div>
             </div>
             <div class="relative z-10 text-center px-6 max-w-4xl">
@@ -80,35 +80,22 @@
                 <h1 class="text-5xl md:text-8xl font-headline font-extrabold text-white mb-8 tracking-tighter leading-none text-glow">
                     Experience the Hidden <br/><span class="text-primary-fixed">Paradise of Anambas</span>
                 </h1>
-                <button class="bg-gradient-to-r from-tertiary to-tertiary-container text-white px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition-transform duration-300 ambient-shadow">
+                <a href="#explore" class="bg-gradient-to-r from-tertiary to-tertiary-container text-white px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition-transform duration-300 ambient-shadow inline-block">
                     Explore Now
-                </button>
+                </a>
             </div>
         </section>
 
-        <section class="py-24 px-8 max-w-7xl mx-auto">
+        <section id="explore" class="py-24 px-8 max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                 <div class="max-w-2xl">
-                    <h2 class="text-4xl md:text-5xl font-headline font-bold mb-4">Pristine Archipelago</h2>
-                    <p class="text-lg text-on-surface-variant leading-relaxed">Discover a world of untouched beauty where the ocean meets the sky in a symphony of blue.</p>
+                    <h2 class="text-4xl md:text-5xl font-headline font-bold text-on-surface mb-4">Pristine Archipelago</h2>
+                    <p class="text-lg text-on-surface-variant leading-relaxed">Temukan destinasi pilihan di Kepulauan Anambas berdasarkan standar kualitas atraksi dan aksesibilitas.</p>
                 </div>
-                <button class="text-primary font-bold flex items-center gap-2 group">
-                    View All Destinations <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                </button>
+                <div class="h-px flex-grow bg-outline-variant/30 mx-8 hidden md:block"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="group bg-surface-container-lowest rounded-xl overflow-hidden ambient-shadow flex flex-col h-[500px]">
-                    <div class="h-2/3 overflow-hidden">
-                        <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://images.unsplash.com/photo-1506929113614-bb92da504821?q=80&w=1945&auto=format&fit=crop"/>
-                    </div>
-                    <div class="p-8">
-                        <h3 class="text-2xl font-headline font-bold mb-2">Pulau Bawah</h3>
-                        <p class="text-on-surface-variant line-clamp-2 text-sm">The pinnacle of luxury eco-tourism featuring six islands and three lagoons.</p>
-                        <button class="mt-4 text-primary font-semibold text-xs tracking-wide uppercase flex items-center gap-1">Learn More <span class="material-symbols-outlined text-xs">open_in_new</span></button>
-                    </div>
-                </div>
-                </div>
+            @livewire('destination-list')
         </section>
     </main>
 
@@ -116,18 +103,18 @@
         @livewire('chatbot')
     </div>
 
-    <footer class="w-full py-12 bg-surface-container-low border-t border-outline-variant/30">
-        <div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-            <div class="mb-4 md:mb-0">
-                <div class="font-headline font-bold text-gray-900 text-xl mb-2">Anambas Tourism Hub</div>
-                <p>Preserving the beauty of Anambas for future generations.</p>
+    <footer class="w-full py-16 bg-surface-container-low border-t border-outline-variant/30">
+        <div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center text-sm text-on-surface-variant">
+            <div class="mb-8 md:mb-0 text-center md:text-left">
+                <div class="font-headline font-bold text-primary text-xl mb-2">Anambas Tourism Hub</div>
+                <p class="max-w-xs">Preserving the untouched beauty of the Anambas archipelago for future generations.</p>
             </div>
-            <div class="flex gap-8">
-                <a href="#" class="hover:text-primary">Privacy</a>
-                <a href="#" class="hover:text-primary">Terms</a>
-                <a href="#" class="hover:text-primary">Contact</a>
+            <div class="flex gap-8 mb-8 md:mb-0 font-medium">
+                <a href="#" class="hover:text-primary transition-colors">Privacy</a>
+                <a href="#" class="hover:text-primary transition-colors">Terms</a>
+                <a href="#" class="hover:text-primary transition-colors">Contact</a>
             </div>
-            <p>© 2026 Anambas Hub. All rights reserved.</p>
+            <p>© 2026 Anambas Hub. Built by KIEL.</p>
         </div>
     </footer>
 
